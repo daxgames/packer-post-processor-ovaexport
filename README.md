@@ -1,0 +1,3 @@
+Nothing to see here just getting started...
+
+This is based on the vsphere post processor from http://github.com/mitchellh/packer.
