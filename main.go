@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/mitchellh/packer/packer/plugin"
-	"github.com/mitchellh/packer/post-processor/vsphere"
+  "github.com/daxgames/packer-post-processor-ovfexport/post-processor"
 )
 
 func main() {
@@ -10,6 +10,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterPostProcessor(new(vsphere.PostProcessor))
+	server.RegisterPostProcessor(new(ovfexport.PostProcessor))
 	server.Serve()
 }

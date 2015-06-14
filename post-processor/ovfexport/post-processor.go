@@ -1,4 +1,4 @@
-package vsphere
+package ovfexport
 
 import (
 	"bytes"
@@ -21,18 +21,8 @@ var builtins = map[string]string{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Insecure     bool   `mapstructure:"insecure"`
-	Cluster      string `mapstructure:"cluster"`
-	Datacenter   string `mapstructure:"datacenter"`
-	Datastore    string `mapstructure:"datastore"`
 	DiskMode     string `mapstructure:"disk_mode"`
-	Host         string `mapstructure:"host"`
-	Password     string `mapstructure:"password"`
-	ResourcePool string `mapstructure:"resource_pool"`
-	Username     string `mapstructure:"username"`
-	VMFolder     string `mapstructure:"vm_folder"`
-	VMName       string `mapstructure:"vm_name"`
-	VMNetwork    string `mapstructure:"vm_network"`
+  Target       string `mapstructure:"target"`
 
 	ctx interpolate.Context
 }
@@ -67,14 +57,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// First define all our templatable parameters that are _required_
 	templates := map[string]*string{
-		"cluster":       &p.config.Cluster,
-		"datacenter":    &p.config.Datacenter,
 		"diskmode":      &p.config.DiskMode,
-		"host":          &p.config.Host,
-		"password":      &p.config.Password,
-		"resource_pool": &p.config.ResourcePool,
-		"username":      &p.config.Username,
-		"vm_name":       &p.config.VMName,
+    "target":        &p.config.Target,
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
@@ -108,24 +92,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	args := []string{
-		fmt.Sprintf("--noSSLVerify=%t", p.config.Insecure),
 		"--acceptAllEulas",
-		fmt.Sprintf("--name=%s", p.config.VMName),
-		fmt.Sprintf("--datastore=%s", p.config.Datastore),
 		fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
-		fmt.Sprintf("--network=%s", p.config.VMNetwork),
-		fmt.Sprintf("--vmFolder=%s", p.config.VMFolder),
-		fmt.Sprintf("%s", vmx),
-		fmt.Sprintf("vi://%s:%s@%s/%s/host/%s/Resources/%s/",
-			url.QueryEscape(p.config.Username),
-			url.QueryEscape(p.config.Password),
-			p.config.Host,
-			p.config.Datacenter,
-			p.config.Cluster,
-			p.config.ResourcePool),
+    fmt.Sprintf("%s", vmx),
+    fmt.Sprintf("%s", p.config.Target),
 	}
 
-	ui.Message(fmt.Sprintf("Uploading %s to vSphere", vmx))
+  ui.Message(fmt.Sprintf("Exporting %s to %s", vmx, p.config.Target))
 	var out bytes.Buffer
 	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 	cmd := exec.Command("ovftool", args...)
