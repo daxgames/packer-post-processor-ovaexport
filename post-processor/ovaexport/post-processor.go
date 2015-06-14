@@ -135,6 +135,20 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
     errs, fmt.Errorf("Invalid compression level. Must be between 1 and 9, or 0 for no compression."))
   }
 
+  if !(p.config.DiskMode == "thick" ||
+    p.config.DiskMode == "thin" ||
+    p.config.DiskMode == "monolithicSparse" ||
+    p.config.DiskMode == "monolithicFlat" ||
+    p.config.DiskMode == "twoGbMaxExtentSparse" ||
+    p.config.DiskMode == "twoGbMaxExtentFlat" ||
+    p.config.DiskMode == "seSparse" ||
+    p.config.DiskMode == "eagerZeroedThick" ||
+    p.config.DiskMode == "sparse" ||
+    p.config.DiskMode == "flat") {
+    errs = packer.MultiErrorAppend(
+      errs, fmt.Errorf("Invalid disk_mode. Only thick(Default), thin, monolithicSparse, monolithicFlat, twoGbMaxExtentSparse, twoGbMaxExtentFlat, seSparse, eagerZeroedThick, sparse, and flat are allowed."))
+  }
+
   if _, err := exec.LookPath("ovftool"); err != nil {
     errs = packer.MultiErrorAppend(
       errs, fmt.Errorf("ovftool not found: %s", err))
@@ -203,7 +217,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
   args := []string{
     "--acceptAllEulas",
     fmt.Sprintf("--diskMode=%s", p.config.DiskMode),
-    fmt.Sprintf("--compress=%s", string(p.config.Compression)),
+    fmt.Sprintf("--compress=%d", p.config.Compression),
     fmt.Sprintf("%s", vmx),
     fmt.Sprintf("%s", p.config.Target),
   }
