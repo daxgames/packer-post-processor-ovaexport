@@ -53,7 +53,7 @@ func (p *PostProcessor) RemoveFloppy(vmx string, ui packer.Ui, artifact packer.A
 }
 
 func (p *PostProcessor) RemoveEthernet(vmx string, ui packer.Ui, artifact packer.Artifact) error {
-  ui.Message(fmt.Sprintf("Removing ethernet intercace from %s", vmx))
+  ui.Message(fmt.Sprintf("Removing ethernet0 intercace from %s", vmx))
   vmxData, err := vmwarecommon.ReadVMX(vmx)
   if err != nil {
     return err
@@ -184,7 +184,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
   if p.config.RemoveEthernet == "true" {
     if err := p.RemoveEthernet(vmx, ui, artifact); err != nil {
-      return nil, false, fmt.Errorf("Removing ethernet interfaces from VMX failed!")
+      return nil, false, fmt.Errorf("Removing ethernet0 interface from VMX failed!")
     }
   }
 
